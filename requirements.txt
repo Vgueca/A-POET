@@ -1,1 +1,3 @@
-Notas de versiones de dependencias y paquetes utilizados
+numpy              
+scipy
+matplotlib
