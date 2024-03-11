@@ -1,6 +1,21 @@
 from utils import *
 from model import *
 
+class CoordinatesDictionary:
+    # Create a void dictionary to store the relative coordinates and their values
+    def __init__(self):
+        self.c_dictionary = {}
+    
+    def add_c(self, x, y, value):
+        self.dictionary[(x, y)] = value
+    
+    def get_c(self, key):
+        return self.dictionary[key]
+    
+    def remove_c(self, x, y):
+        del self.dictionary[(x, y)]
+
+
 class Agent:
     def __init__(self, row, column, orientation, initial_vision, max_rows = 100, max_cols = 100, max_energy = 5000):
         self.row = row
@@ -18,6 +33,10 @@ class Agent:
         self.has_shoes = False
         
         self.vision = initial_vision
+        
+        self.relative_row = 1
+        self.relative_column = 1
+        self.discovered_map = CoordinatesDictionary()
 
     def next_action(self):
         # Get the next action from the brain (model)
@@ -59,6 +78,8 @@ class Agent:
     
     def set_vision(self, vision):
         self.vision = vision
+        self.register_vision()
+        
 
     def enough_energy(self, action, current_cell):
         # Get the cost of the action and check if the agent has enough energy
@@ -94,3 +115,36 @@ class Agent:
             self.orientation = Direction.DOWN
         elif self.orientation == Direction.LEFT:
             self.orientation = Direction.UP
+            
+    def register_vision(self):
+        count = 0
+        row = self.relative_column
+        col = self.relative_column
+        
+        match self.orientation:
+            # 0
+            case Direction.UP:  
+                for i in range(0, 3):
+                    for j in range(-i, i):
+                        self.discovered_map.add_c(row-i, col+j, self.vision[count])
+                        count += 1
+            # 1
+            case Direction.RIGHT:
+                for i in range(0, 3):
+                    for j in range(-i, i):
+                        self.discovered_map.add_c(row+j, col+i, self.vision[count])
+                        count += 1
+            # 2
+            case Direction.DOWN:
+                for i in range(0, 3):
+                    for j in range(-i, i):
+                        self.discovered_map.add_c(row+i, col-j, self.vision[count])
+                        count += 1
+            # 3
+            case Direction.LEFT:
+                for i in range(0, 3):
+                    for j in range(-i, i):
+                        self.discovered_map.add_c(row-j, col-i, self.vision[count])
+                        count += 1
+                        
+            
