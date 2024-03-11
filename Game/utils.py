@@ -25,6 +25,12 @@ class CellType(Enum):
     CHARGE = 9
     CHECKPOINT = 10
 
+class Validation(Enum):
+    VALID = 0
+    EMPTY_CELL = 1
+    WALL_CELL = 2
+    NO_ENERGY = 3
+
 def get_cost(action, cell_type, has_bikini, has_shoes):
     if cell_type == CellType.EMPTY or cell_type == CellType.WALL:
         print("ERROR: EMPTY OR WALL CELL") # RAISE ERROR
