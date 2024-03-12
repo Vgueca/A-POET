@@ -1,18 +1,18 @@
-from enum import Enum
+from enum import IntEnum
 
-class Action(Enum):
+class Action(IntEnum):
     IDLE = 0
     FORWARD = 1
     TURN_LEFT = 2
     TURN_RIGHT = 3
 
-class Direction(Enum):
+class Direction(IntEnum):
     UP = 0
     RIGHT = 1
     DOWN = 2
     LEFT = 3
 
-class CellType(Enum):
+class CellType(IntEnum):
     EMPTY = 0
     WALL = 1
     STONE = 2
@@ -26,7 +26,7 @@ class CellType(Enum):
     CHECKPOINT = 10
     NOT_VISITED = 11
 
-class Validation(Enum):
+class Validation(IntEnum):
     VALID = 0
     EMPTY_CELL = 1
     WALL_CELL = 2

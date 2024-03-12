@@ -7,13 +7,13 @@ class CoordinatesDictionary:
         self.c_dictionary = {}
     
     def add_c(self, x, y, value):
-        self.dictionary[(x, y)] = value
+        self.c_dictionary[(x, y)] = value
     
     def get_c(self, key):
-        return self.dictionary[key]
+        return self.c_dictionary[key]
     
     def remove_c(self, x, y):
-        del self.dictionary[(x, y)]
+        del self.c_dictionary[(x, y)]
 
 
 class Agent:
@@ -53,12 +53,12 @@ class Agent:
         return self.energy
     
     def get_forward_cell_type(self):
-        return self.vision[0]
+        return self.vision[2]
     
-    def has_bikini(self):
+    def get_bikini(self):
         return self.has_bikini
     
-    def has_shoes(self):
+    def get_shoes(self):
         return self.has_shoes
     
     def set_position(self, row, column):
@@ -84,7 +84,7 @@ class Agent:
         self.has_shoes = has_shoes
     
     def set_vision(self, vision):
-        self.vision = vision
+        self.vision = [CellType(x) for x in vision]
         self.register_vision()
 
     def enough_energy(self, action, current_cell_type):
@@ -116,26 +116,26 @@ class Agent:
         match self.orientation:
             # 0
             case Direction.UP:  
-                for i in range(0, 3):
-                    for j in range(-i, i):
+                for i in range(0,4):
+                    for j in range(-i,i+1):
                         self.discovered_map.add_c(row-i, col+j, self.vision[count])
                         count += 1
             # 1
             case Direction.RIGHT:
-                for i in range(0, 3):
-                    for j in range(-i, i):
+                for i in range(0,4):
+                    for j in range(-i,i+1):
                         self.discovered_map.add_c(row+j, col+i, self.vision[count])
                         count += 1
             # 2
             case Direction.DOWN:
-                for i in range(0, 3):
-                    for j in range(-i, i):
+                for i in range(0,4):
+                    for j in range(-i,i+1):
                         self.discovered_map.add_c(row+i, col-j, self.vision[count])
                         count += 1
             # 3
             case Direction.LEFT:
-                for i in range(0, 3):
-                    for j in range(-i, i):
+                for i in range(0,4):
+                    for j in range(-i,i+1):
                         self.discovered_map.add_c(row-j, col-i, self.vision[count])
                         count += 1
                         
