@@ -24,6 +24,7 @@ class CellType(Enum):
     SHOES = 8
     CHARGE = 9
     CHECKPOINT = 10
+    NOT_VISITED = 11
 
 class Validation(Enum):
     VALID = 0

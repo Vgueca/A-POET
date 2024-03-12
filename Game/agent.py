@@ -32,11 +32,12 @@ class Agent:
         self.has_bikini = False
         self.has_shoes = False
         
-        self.vision = initial_vision
-        
-        self.relative_row = 1
-        self.relative_column = 1
+        self.relative_row = 0
+        self.relative_column = 0
         self.discovered_map = CoordinatesDictionary()
+
+        self.vision = initial_vision
+        self.register_vision()
 
     def next_action(self):
         # Get the next action from the brain (model)
@@ -53,6 +54,12 @@ class Agent:
     
     def get_forward_cell_type(self):
         return self.vision[0]
+    
+    def has_bikini(self):
+        return self.has_bikini
+    
+    def has_shoes(self):
+        return self.has_shoes
     
     def set_position(self, row, column):
         self.row = row
@@ -79,12 +86,11 @@ class Agent:
     def set_vision(self, vision):
         self.vision = vision
         self.register_vision()
-        
 
-    def enough_energy(self, action, current_cell):
+    def enough_energy(self, action, current_cell_type):
         # Get the cost of the action and check if the agent has enough energy
-        cost = get_cost(action, current_cell, self.has_bikini, self.has_shoes)
-        return self.energy - cost >= 0
+        cost = get_cost(action, current_cell_type, self.has_bikini, self.has_shoes)
+        return self.energy >= cost
     
     def move_forward(self):
         if self.orientation == Direction.UP:
@@ -97,28 +103,14 @@ class Agent:
             self.column -= 1
         
     def turn_left(self):
-        if self.orientation == Direction.UP:
-            self.orientation = Direction.LEFT
-        elif self.orientation == Direction.DOWN:
-            self.orientation = Direction.RIGHT
-        elif self.orientation == Direction.RIGHT:
-            self.orientation = Direction.UP
-        elif self.orientation == Direction.LEFT:
-            self.orientation = Direction.DOWN
+        self.orientation = (self.orientation + 3) % 4
     
     def turn_right(self):
-        if self.orientation == Direction.UP:
-            self.orientation = Direction.RIGHT
-        elif self.orientation == Direction.DOWN:
-            self.orientation = Direction.LEFT
-        elif self.orientation == Direction.RIGHT:
-            self.orientation = Direction.DOWN
-        elif self.orientation == Direction.LEFT:
-            self.orientation = Direction.UP
+        self.orientation = (self.orientation + 1) % 4
             
     def register_vision(self):
         count = 0
-        row = self.relative_column
+        row = self.relative_row
         col = self.relative_column
         
         match self.orientation:

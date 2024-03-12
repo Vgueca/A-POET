@@ -1,44 +1,94 @@
+from utils import CellType, Direction
+from gui import *
+import random
+
 class GameMap:
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
-        self.tiles = self.initialize_tiles()
+    def __init__(self, rows, cols, initial_agent_position, initial_agent_orientation):
+        self.rows = rows
+        self.cols = cols
+        self.map = self.create_map(rows, cols)
 
-    def initialize_tiles(self):
-        tiles = [[Tile(False) for y in range(self.height)] for x in range(self.width)]
-        return tiles
+        self.agent_map = [[CellType.EMPTY for _ in range(cols)] for _ in range(rows)]
 
-    def is_blocked(self, x, y):
-        if self.tiles[x][y].blocked:
-            return True
-        return False
+        self.game_gui = GameGUI(self.agent_map, initial_agent_position, initial_agent_orientation)
 
-    def make_map(self):
-        for x in range(self.width):
-            for y in range(self.height):
-                if random.randint(0, 100) < 20:
-                    self.tiles[x][y].blocked = True
-                    self.tiles[x][y].block_sight = True
+        self.game_gui.mainloop()
+    
+    def get_cell_type(self, row, col):
+        return self.map[row][col]
+    
+    def get_vision(self, row, col, orientation):
+        vision = []
 
-    def render(self):
-        for y in range(self.height):
-            for x in range(self.width):
-                if self.tiles[x][y].block_sight:
-                    libtcod.console_set_char_background(con, x, y, colors.get('dark_wall'), libtcod.BKGND_SET)
-                else:
-                    libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET)
+        match orientation:
+            # 0
+            case Direction.UP:  
+                for i in range(0, 3):
+                    for j in range(-i, i):
+                        if row-i < 0 or col+j < 0 or row-i >= self.rows or col+j >= self.cols:
+                            vision.append(CellType.EMPTY)
+                        else:
+                            vision.append(map[row-i][col+j])
+            # 1
+            case Direction.RIGHT:
+                for i in range(0, 3):
+                    for j in range(-i, i):
+                        if row+j < 0 or col+i < 0 or row+j >= self.rows or col+i >= self.cols:
+                            vision.append(CellType.EMPTY)
+                        else:
+                            vision.append(map[row+j][col+i])
+            # 2
+            case Direction.DOWN:
+                for i in range(0, 3):
+                    for j in range(-i, i):
+                        if row+i < 0 or col-j < 0 or row+i >= self.rows or col-j >= self.cols:
+                            vision.append(CellType.EMPTY)
+                        else:
+                            vision.append(map[row+i][col-j])
+            # 3
+            case Direction.LEFT:
+                for i in range(0, 3):
+                    for j in range(-i, i):
+                        if row-j < 0 or col-i < 0 or row-j >= self.rows or col-i >= self.cols:
+                            vision.append(CellType.EMPTY)
+                        else:
+                            vision.append(map[row-j][col-i])
+        
+        return vision
+    
+    def update_agent_map(self, row, col, orientation):
+        self.agent_map = [[CellType.EMPTY for _ in range(self.cols)] for _ in range(self.rows)]
 
-    def render_all(self):
-        self.render()
-        libtcod.console_blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0)
+        match orientation:
+            # 0
+            case Direction.UP:  
+                for i in range(0, 3):
+                    for j in range(-i, i):
+                        if row-i < 0 or col+j < 0 or row-i >= self.rows or col+j >= self.cols:
+                            self.agent_map[row-i][col+j] = self.map[row-i][col+j]
+            # 1
+            case Direction.RIGHT:
+                for i in range(0, 3):
+                    for j in range(-i, i):
+                        if row+j < 0 or col+i < 0 or row+j >= self.rows or col+i >= self.cols:
+                            self.agent_map[row+j][col+i] = self.map[row+j][col+i]
+            # 2
+            case Direction.DOWN:
+                for i in range(0, 3):
+                    for j in range(-i, i):
+                        if row+i < 0 or col-j < 0 or row+i >= self.rows or col-j >= self.cols:
+                            self.agent_map[row+i][col-j] = self.map[row+i][col-j]
+            # 3
+            case Direction.LEFT:
+                for i in range(0, 3):
+                    for j in range(-i, i):
+                        if row-j < 0 or col-i < 0 or row-j >= self.rows or col-i >= self.cols:
+                            self.agent_map[row-j][col-i] = self.map[row-j][col-i]
+        
+        self.game_gui.update_gui(self.agent_map, self.agent_position, self.agent_orientation)
 
-    def clear_all(self):
-        for y in range(self.height):
-            for x in range(self.width):
-                libtcod.console_set_char_background(con, x, y, libtcod.black, libtcod.BKGND_SET)
-
-    def clear(self):
-        for y in range(self.height):
-            for x in range(self.width):
-                self.tiles[x][y].blocked = False
-                self.tiles[x][y].block_sight = False
+    def create_map(self, rows, cols):
+        self.initialize_random_map(rows, cols)
+    
+    def initialize_random_map(self, rows, cols):
+        map = [[random.randint(0, 10) for _ in range(cols)] for _ in range(rows)]

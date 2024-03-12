@@ -52,8 +52,11 @@ class Engine:
         # Update the agent's vision
         self.agent.set_vision(self.game_map.get_vision(self.agent.row, self.agent.column, self.agent.orientation))
         
+        # Update the agent's map
+        self.game_map.update_agent_map(self.agent.row, self.agent.column, self.agent.orientation)
+
         # Update the stats
-        pass
+        return
 
     def is_valid(self, action):
         # Check if the agent has enough energy to move
