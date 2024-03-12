@@ -1,6 +1,6 @@
-from utils import *
-from game_environment import *
-from agent import *
+from Game.utils import *
+from Game.game_environment import *
+from Game.agent import *
 import time
 
 class Engine:
@@ -18,7 +18,7 @@ class Engine:
             
             print(next_action)
 
-            self.apply_action(next_action)
+            result = self.apply_action(next_action)
             
             print("Position: ", self.agent.get_position())
             print("Orientation: ", self.agent.get_orientation())
@@ -28,6 +28,10 @@ class Engine:
             self.iters += 1
             
             time.sleep(1)
+            
+            # if the agent fell into the void or ran out of energy, terminate the simulation
+            if result == Validation.EMPTY_CELL or result == Validation.NO_ENERGY:
+                break
 
             self.update()
             
@@ -36,14 +40,14 @@ class Engine:
             case Validation.EMPTY_CELL:
                 # Terminate the simulation
                 print("The agent fell into the void!")
-                pass
+                return Validation.EMPTY_CELL
             case Validation.WALL_CELL:
                 print("The agent crashed into a wall!")
-                return
+                return Validation.WALL_CELL
             case Validation.NO_ENERGY:
                 # Terminate the simulation
                 print("The agent ran out of energy!")
-                pass
+                return Validation.NO_ENERGY 
             case Validation.VALID:
                 # Update the agent's energy
                 row_before, column_before = self.agent.get_position()
@@ -61,6 +65,8 @@ class Engine:
                         self.agent.turn_left()
                     case Action.TURN_RIGHT:
                         self.agent.turn_right()
+                
+                return Validation.VALID
 
     def update(self):
         # Update the agent's vision
@@ -92,8 +98,3 @@ class Engine:
                 return Validation.VALID
 
         return Validation.VALID
-    
-    
-env = GameEnv()
-engine = Engine(env, Agent(5, 5, Direction.UP, env.game_map.get_vision(5, 5, Direction.UP)))
-engine.simulate()

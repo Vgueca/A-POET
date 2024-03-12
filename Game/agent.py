@@ -1,5 +1,5 @@
-from utils import *
-from brain import *
+from Game.utils import *
+from Game.brain import *
 
 class CoordinatesDictionary:
     # Create a void dictionary to store the relative coordinates and their values

@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from utils import CellType, Direction
+from Game.utils import CellType, Direction
 
 class GameGUI(tk.Tk):
     def __init__(self, initial_game_map, agent_position, agent_orientation):

@@ -19,7 +19,6 @@ class Model:
         model.compile(optimizer=Adam(lr=self.learning_rate), loss=self.custom_loss)
         return model
 
-    # TODO: cambiar esto. Es un ejemplo de implementacion de modelo RL
     def custom_loss(self, y_true, y_pred):
         # Calculamos la loss como el error cuadrático medio ponderado por el reward
         reward = y_true[:, 0]  # El reward está en la primera columna de y_true

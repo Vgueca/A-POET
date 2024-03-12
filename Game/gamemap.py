@@ -1,5 +1,5 @@
-from utils import CellType, Direction
-from gui import *
+from Game.utils import CellType, Direction
+from Game.gui import *
 import random
 
 class GameMap:
