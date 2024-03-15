@@ -4,7 +4,7 @@ from keras.optimizers import Adam
 import numpy as np
 
 class Model:
-    def __init__(self, state_size, action_size, learning_rate=0.001, discount_factor=0.95):
+    def __init__(self, state_size, action_size = 4, learning_rate=0.001, discount_factor=0.95):
         self.state_size = state_size
         self.action_size = action_size
         self.learning_rate = learning_rate

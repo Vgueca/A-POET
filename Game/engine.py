@@ -4,36 +4,36 @@ from Game.agent import *
 import time
 
 class Engine:
-    def __init__(self, game_env, agent, max_iters = 1000):
-        self.game_env = game_env
-        self.agent = agent
+    def __init__(self, env, model, max_iters = 1000):
+        self.game_map = env.get_game_map()
+
+        initial_agent_vision = self.game_map.get_vision(env.agent_row, env.agent_col, env.agent_orientation)
+        self.agent = Agent(env.agent_row, env.agent_col, env.agent_orientation, initial_agent_vision, model, env.rows, env.cols)
+
         self.max_iters = max_iters
         self.iters = 0
 
-    def simulate(self):
-        self.update()
+    def simulate(self, train = True):
+        self.update(train)
         
         while self.iters < self.max_iters:
-            next_action = self.agent.next_action()
+            next_action = self.agent.next_action(state)
             
             print(next_action)
 
-            result = self.apply_action(next_action)
-            
-            print("Position: ", self.agent.get_position())
-            print("Orientation: ", self.agent.get_orientation())
-            print("Energy: ", self.agent.get_energy())
-            print("Vision: ", self.agent.vision)
+            valid = self.apply_action(next_action)
 
             self.iters += 1
-            
-            time.sleep(1)
-            
-            # if the agent fell into the void or ran out of energy, terminate the simulation
-            if result == Validation.EMPTY_CELL or result == Validation.NO_ENERGY:
-                break
 
-            self.update()
+            time.sleep(1)
+
+            self.update(train)
+
+            # if the agent fell into the void or ran out of energy, terminate the simulation
+            if valid == Validation.EMPTY_CELL or valid == Validation.NO_ENERGY:
+                break
+        
+        return self.agent.get_final_score(final_state)
             
     def apply_action(self, next_action):
         match self.is_valid(next_action):
@@ -51,7 +51,7 @@ class Engine:
             case Validation.VALID:
                 # Update the agent's energy
                 row_before, column_before = self.agent.get_position()
-                cost = get_cost(next_action, self.game_env.game_map.get_cell_type(row_before, column_before), self.agent.get_bikini(), self.agent.get_shoes())
+                cost = get_cost(next_action, self.game_map.get_cell_type(row_before, column_before), self.agent.get_bikini(), self.agent.get_shoes())
                 self.agent.decrease_energy(cost)
                 
                 if self.agent.get_energy() < 0:
@@ -68,20 +68,24 @@ class Engine:
                 
                 return Validation.VALID
 
-    def update(self):
+    def update(self, train):
         # Update the agent's vision
-        self.agent.set_vision(self.game_env.game_map.get_vision(self.agent.row, self.agent.column, self.agent.orientation))
+        self.agent.set_vision(self.game_map.get_vision(self.agent.row, self.agent.column, self.agent.orientation))
         
         # Update the agent's map
-        self.game_env.game_map.update_agent_map(self.agent.row, self.agent.column, self.agent.orientation)
+        self.game_map.update_agent_map(self.agent.row, self.agent.column, self.agent.orientation)
 
+        # Train the agent's brain model
+        if train:
+            self.agent.train_brain(new_state)
+        
         # Update the stats
         return
 
     def is_valid(self, action):
         # Check if the agent has enough energy to move
         row, column = self.agent.get_position()
-        current_cell_type = self.game_env.game_map.get_cell_type(row, column)
+        current_cell_type = self.game_map.get_cell_type(row, column)
         cost = get_cost(action, current_cell_type, self.agent.get_bikini(), self.agent.get_shoes())
 
         next_cell_type = self.agent.get_forward_cell_type()

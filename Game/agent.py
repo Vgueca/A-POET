@@ -17,12 +17,12 @@ class CoordinatesDictionary:
 
 
 class Agent:
-    def __init__(self, row, column, orientation, initial_vision, max_rows = 100, max_cols = 100, max_energy = 5000):
+    def __init__(self, row, column, orientation, initial_vision, model, max_rows = 100, max_cols = 100, max_energy = 5000):
         self.row = row
         self.column = column
         self.orientation = orientation
         
-        self.brain = Brain()
+        self.brain = Brain(model)
         
         self.energy = max_energy
         
@@ -39,9 +39,15 @@ class Agent:
         self.vision = initial_vision
         self.register_vision()
 
-    def next_action(self):
+    def next_action(self, state):
         # Get the next action from the brain (model)
-        return self.brain.get_action()
+        return self.brain.get_action(state)
+    
+    def train_brain(self, new_state):
+        self.brain.train(new_state)
+    
+    def get_final_score(self, final_state):
+        return self.brain.get_final_reward(final_state)
 
     def get_position(self):
         return self.row, self.column
