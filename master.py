@@ -94,7 +94,7 @@ def master(args):
                 if admitted >= args.max_children:
                     break
 
-        if len(active_niches) > args.max_num_envs:    # We can do this easier using the del statement
+        if len(active_niches) > args.max_num_envs:
             active_niches = active_niches[:args.max_num_envs]
 
 def main():
