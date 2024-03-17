@@ -35,10 +35,10 @@ class Environment:
         self.charge = charge
         self.seed = seed
 
-        self.game_map = self.generate_game_map()
+        self.game_map = self.generate_game_map()    # Maybe we should delete the game map when the environment is not active
 
     def mutate(self, categories):
-        child_id = Environment.count_ids
+        child_id = Environment.count_ids    # If we use parallelism, we must use a lock to avoid problems
         Environment.count_ids += 1
 
         rows = self.rows
@@ -105,3 +105,21 @@ class Environment:
     
     def generate_game_map(self):
         pass
+
+    def __eq__(self, __value: object) -> bool:
+        return self.rows == __value.rows \
+            and self.cols == __value.cols \
+            and self.agent_row == __value.agent_row \
+            and self.agent_col == __value.agent_col \
+            and self.agent_orientation == __value.agent_orientation \
+            and self.empty == __value.empty \
+            and self.wall == __value.wall \
+            and self.stone == __value.stone \
+            and self.sand == __value.sand \
+            and self.water == __value.water \
+            and self.grass == __value.grass \
+            and self.mud == __value.mud \
+            and self.bikini == __value.bikini \
+            and self.shoes == __value.shoes \
+            and self.charge == __value.charge \
+            and self.seed == __value.seed
