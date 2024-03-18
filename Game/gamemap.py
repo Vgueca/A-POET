@@ -3,11 +3,11 @@ from Game.gui import *
 import random
 
 class GameMap:
-    def __init__(self, rows, cols, initial_agent_position, initial_agent_orientation):
+    def __init__(self, rows, cols, initial_agent_position, initial_agent_orientation, map):
         self.rows = rows
         self.cols = cols
         
-        self.create_map(rows, cols)
+        self.map = map
         
         self.map_gui = GameGUI(self.map, initial_agent_position, initial_agent_orientation)
 
