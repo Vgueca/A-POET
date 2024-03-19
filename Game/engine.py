@@ -1,6 +1,7 @@
 from Game.utils import *
 from Game.game_environment import *
 from Game.agent import *
+from Game.simulation_stats import *
 import time
 
 class Engine:
@@ -12,6 +13,8 @@ class Engine:
 
         self.max_iters = max_iters
         self.iters = 0
+        
+        self.stats = SimulationStats() 
 
     def simulate(self, train = True):
         self.update(train)
@@ -33,7 +36,10 @@ class Engine:
             if valid == Validation.EMPTY_CELL or valid == Validation.NO_ENERGY:
                 break
         
-        return self.agent.get_final_score(final_state)
+        self.stats.print_summary()
+        
+        # we return just the final score of the simulation
+        return self.stats.scores[-1] 
             
     def apply_action(self, next_action):
         match self.is_valid(next_action):
@@ -74,13 +80,13 @@ class Engine:
         
         # Update the agent's map
         self.game_map.update_agent_map(self.agent.row, self.agent.column, self.agent.orientation)
-
-        # Train the agent's brain model
-        if train:
-            self.agent.train_brain(new_state)
         
         # Update the stats
-        return
+        self.stats.update(self.agent)
+        
+        # Train the agent's brain model
+        if train:
+            self.agent.train_brain(new_state) #TODO definir state
 
     def is_valid(self, action):
         # Check if the agent has enough energy to move

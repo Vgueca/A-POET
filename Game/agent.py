@@ -46,8 +46,8 @@ class Agent:
     def train_brain(self, new_state):
         self.brain.train(new_state)
     
-    def get_final_score(self, final_state):
-        return self.brain.get_final_reward(final_state)
+    def get_score(self, state):
+        return self.brain.compute_reward(state)
 
     def get_position(self):
         return self.row, self.column
@@ -66,6 +66,10 @@ class Agent:
     
     def get_shoes(self):
         return self.has_shoes
+    
+    # TODO  implement this method
+    def get_map_percentage(self):
+        pass
     
     def set_position(self, row, column):
         self.row = row

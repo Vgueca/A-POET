@@ -16,9 +16,6 @@ class Brain:
 
         self.model.train(self.prev_state, self.last_action, reward)
 
-    def compute_reward(self):
-        # TODO
+    def compute_reward(self, state):
+        # TODO compute the reward based on the state
         pass
-
-    def get_final_reward(self, final_state):
-        return self.compute_reward(final_state)

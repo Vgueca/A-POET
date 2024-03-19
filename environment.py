@@ -1,7 +1,7 @@
 import random
 import numpy as np
 from math import *
-import gamemap
+import Game.gamemap
 
 class Environment:
     env_ids = 1  # Class variable to count child names

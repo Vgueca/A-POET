@@ -2,7 +2,8 @@ from environment import *
 from Models.RL_model import *
 from Game.engine import Engine
 from copy import deepcopy
-from collections import OrderedDict
+from collections import namedtuple
+NicheStats = namedtuple("NicheStats", ["ID", "Environment", "Agent", "N_iters", "Percentage", "Score", "Max_Last_5_Scores"])
 
 class Niche:
     def __init__(self, id, env, model, args):
@@ -19,6 +20,8 @@ class Niche:
 
         self.mc_lower = args.mc_lower
         self.mc_upper = args.mc_upper
+        
+        self.stats = NicheStats(ID = id, Environment = env, Agent = model, N_iters = 0, Percentage = 0, Score=self.score, Max_Last_5_Scores=self.max_score_last_5) 
 
     def simulate(self, train = True):
         self.score = Engine(self.env, self.model).simulate(train)

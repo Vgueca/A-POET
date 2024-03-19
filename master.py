@@ -1,6 +1,7 @@
 import numpy as np
 from argparse import ArgumentParser
 from copy import deepcopy
+from collections import namedtuple
 
 from Game.game_environment import GameEnv
 from Game.agent import Agent
@@ -13,6 +14,8 @@ from Models.RL_model import *
 from niche import Niche
 
 from pata_ec import *
+
+# GlobalStats = namedtuple("GlobalStats", ["Enviroment_Size", "Agent_Size", "Number_Transfers", "Number_mutations"])
 
 def master(args):    
     '''env = GameEnv(args)
@@ -28,6 +31,10 @@ def master(args):
     initial_niche = Niche(0, initial_env, inital_model)
     active_niches.append(initial_niche)
     all_niches.append(initial_niche)
+    
+    #TODO print adequately the global stats for each iteration (via GUI in the future)
+    n_mutations = 0
+    n_transfers = 0
 
     step = 0
     while step < args.max_steps:
@@ -49,7 +56,10 @@ def master(args):
     
     def attempt_transfer():         # In POET the only attempt the tranfers between the active niches
         for niche in all_niches:
-            niche.attempt_transfer(all_niches)
+            transfer_was_made = niche.attempt_transfer(all_niches)
+            
+            if transfer_was_made:
+                n_transfers += 1
 
     def mutate_envs():
         all_envs = [niche.env for niche in all_niches]
@@ -91,6 +101,7 @@ def master(args):
                 all_niches.append(new_niche)
                 active_niches.append(new_niche)
                 admitted += 1
+                n_mutations += 1
                 if admitted >= args.max_children:
                     break
 
