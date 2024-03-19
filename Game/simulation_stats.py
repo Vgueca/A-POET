@@ -5,9 +5,9 @@ class SimulationStats:
         self.energy = []
         self.scores = []
     
-    def update(self, agent):
+    def update(self, agent, state):
         self.actions.append(agent.brain.last_action)
-        self.map_percentage.append(agent.get_map_percentage())
+        self.map_percentage.append(state.compute_percentage_map())
         self.energy.append(agent.get_energy())
         
         #TODO define state here

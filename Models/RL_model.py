@@ -4,33 +4,41 @@ from keras.optimizers import Adam
 import numpy as np
 
 class Model:
-    def __init__(self, state_size, action_size = 4, learning_rate=0.001, discount_factor=0.95):
-        self.state_size = state_size
-        self.action_size = action_size
-        self.learning_rate = learning_rate
-        self.discount_factor = discount_factor
-        self.model = self.build_model()
+    def __init__(self, args):
+        self.q_values = {}
+        self.learning_rate = args.learning_rate
+        self.discount_factor = args.discount_factor
+        self.epsilon = args.epsilon_greedy
 
-    def build_model(self):
-        model = Sequential()
-        model.add(Dense(64, input_dim=self.state_size, activation='relu'))
-        model.add(Dense(32, activation='relu'))
-        model.add(Dense(self.action_size, activation='linear'))  # Usamos activación lineal para los Q-values
-        model.compile(optimizer=Adam(lr=self.learning_rate), loss=self.custom_loss)
-        return model
-
-    def custom_loss(self, y_true, y_pred):
-        # Calculamos la loss como el error cuadrático medio ponderado por el reward
-        reward = y_true[:, 0]  # El reward está en la primera columna de y_true
-        Q_value = y_pred  # El valor Q predicho por la red neuronal
-        return np.mean(np.square(reward - Q_value))
+        #self.model = self.build_model()
 
     def get_action(self, state):
-        # Supongamos que state contiene todos los parámetros del agente
-        return np.argmax(self.model.predict(state))
+        self.initialize_q_values(state)
+        if np.random.rand() < self.epsilon:
+            return np.random.choice(4)
+        else:
+            candidates_q_values = [self.q_values[(state, a)] for a in range(4)]
+            return np.argmax(candidates_q_values)
 
-    def train(self, X, y):
-        # Entrenamos el modelo con los datos de entrada y los targets (rewards)
-        self.model.fit(X, y, epochs=1, verbose=0)
+    def train(self, prev_state, action, reward, next_state):
+        self.initialize_q_values(prev_state)
+        self.initialize_q_values(next_state)
+        
+        ''' Condition that should never happen
+        # if next state is none it means that the agent has reached a terminal state
+        if next_state is None:
+            self.q_values[(prev_state, action)] += self.learning_rate * (reward - self.q_values[(prev_state, action)])
+            return'''
+        
+        candidates_q_values = [self.q_values[(next_state, a)] for a in range(4)]
+        next_q_value = np.max(candidates_q_values)
+        
+        self.q_values[(prev_state, action)] += self.learning_rate * (reward + self.discount_factor * next_q_value - self.q_values[(prev_state, action)])
+        
+    # if the q_values are not initialized, we initialize them
+    def initialize_q_values(self, state):
+        for action in range(4):
+            if (state, action) not in self.q_values:
+                self.q_values[(state, action)] = 0
 
 

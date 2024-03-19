@@ -1,7 +1,7 @@
 from Game.utils import *
-from Game.game_environment import *
 from Game.agent import *
 from Game.simulation_stats import *
+from Game.state import *
 import time
 
 class Engine:
@@ -14,12 +14,13 @@ class Engine:
         self.max_iters = max_iters
         self.iters = 0
         
-        self.stats = SimulationStats() 
+        self.stats = SimulationStats()
 
     def simulate(self, train = True):
         self.update(train)
         
         while self.iters < self.max_iters:
+            state = State(self.agent, self.game_map)
             next_action = self.agent.next_action(state)
             
             print(next_action)
@@ -39,13 +40,14 @@ class Engine:
         self.stats.print_summary()
         
         # we return just the final score of the simulation
-        return self.stats.scores[-1] 
+        return self.stats.scores[-1]
             
     def apply_action(self, next_action):
         match self.is_valid(next_action):
             case Validation.EMPTY_CELL:
                 # Terminate the simulation
                 print("The agent fell into the void!")
+                self.agent.alive = False
                 return Validation.EMPTY_CELL
             case Validation.WALL_CELL:
                 print("The agent crashed into a wall!")
@@ -75,18 +77,22 @@ class Engine:
                 return Validation.VALID
 
     def update(self, train):
-        # Update the agent's vision
-        self.agent.set_vision(self.game_map.get_vision(self.agent.row, self.agent.column, self.agent.orientation))
+        if self.agent.is_alive():
+            # Update the agent's vision
+            self.agent.set_vision(self.game_map.get_vision(self.agent.row, self.agent.column, self.agent.orientation))
+            
+            # Update the agent's map
+            self.game_map.update_agent_map(self.agent.row, self.agent.column, self.agent.orientation)
         
-        # Update the agent's map
-        self.game_map.update_agent_map(self.agent.row, self.agent.column, self.agent.orientation)
+        # Create a new state
+        new_state = State(self.agent, self.game_map)
         
         # Update the stats
-        self.stats.update(self.agent)
+        self.stats.update(self.agent, new_state)
         
         # Train the agent's brain model
         if train:
-            self.agent.train_brain(new_state) #TODO definir state
+            self.agent.train_brain(new_state)
 
     def is_valid(self, action):
         # Check if the agent has enough energy to move

@@ -11,7 +11,7 @@ class Niche:
         self.env = env
         self.model = model
 
-        self.score = None
+        self.score = 0
         self.last_scores = []
         self.max_score_last_5 = -np.Infinity
 

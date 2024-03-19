@@ -119,3 +119,6 @@ class GameMap:
             return CellType.CHARGE
         else:
             return CellType.EMPTY
+        
+    def flatten_map(self):
+        return [cell for row in self.agent_map for cell in row]

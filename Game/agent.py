@@ -1,23 +1,8 @@
 from Game.utils import *
 from Game.brain import *
 
-class CoordinatesDictionary:
-    # Create a void dictionary to store the relative coordinates and their values
-    def __init__(self):
-        self.c_dictionary = {}
-    
-    def add_c(self, x, y, value):
-        self.c_dictionary[(x, y)] = value
-    
-    def get_c(self, key):
-        return self.c_dictionary[key]
-    
-    def remove_c(self, x, y):
-        del self.c_dictionary[(x, y)]
-
-
 class Agent:
-    def __init__(self, row, column, orientation, initial_vision, model, max_rows = 100, max_cols = 100, max_energy = 5000):
+    def __init__(self, row, column, orientation, initial_vision, model, max_rows = 50, max_cols = 50, max_energy = 5000):
         self.row = row
         self.column = column
         self.orientation = orientation
@@ -34,10 +19,12 @@ class Agent:
         
         self.relative_row = 0
         self.relative_column = 0
-        self.discovered_map = CoordinatesDictionary()
+        self.discovered_map = {}
 
         self.vision = initial_vision
         self.register_vision()
+        
+        self.alive = True
 
     def next_action(self, state):
         # Get the next action from the brain (model)
@@ -67,9 +54,11 @@ class Agent:
     def get_shoes(self):
         return self.has_shoes
     
-    # TODO  implement this method
-    def get_map_percentage(self):
-        pass
+    def get_memory(self):
+        return self.discovered_map
+
+    def is_alive(self):
+        return self.alive
     
     def set_position(self, row, column):
         self.row = row
@@ -128,25 +117,25 @@ class Agent:
             case Direction.UP:  
                 for i in range(0,4):
                     for j in range(-i,i+1):
-                        self.discovered_map.add_c(row-i, col+j, self.vision[count])
+                        self.discovered_map[(row-i, col+j)] = self.vision[count]
                         count += 1
             # 1
             case Direction.RIGHT:
                 for i in range(0,4):
                     for j in range(-i,i+1):
-                        self.discovered_map.add_c(row+j, col+i, self.vision[count])
+                        self.discovered_map[(row+j, col+i)] = self.vision[count]
                         count += 1
             # 2
             case Direction.DOWN:
                 for i in range(0,4):
                     for j in range(-i,i+1):
-                        self.discovered_map.add_c(row+i, col-j, self.vision[count])
+                        self.discovered_map[(row+i, col-j)] = self.vision[count]
                         count += 1
             # 3
             case Direction.LEFT:
                 for i in range(0,4):
                     for j in range(-i,i+1):
-                        self.discovered_map.add_c(row-j, col-i, self.vision[count])
+                        self.discovered_map[(row-j, col-i)] = self.vision[count]
                         count += 1
                         
             
