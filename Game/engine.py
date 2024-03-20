@@ -2,11 +2,12 @@ from Game.utils import *
 from Game.agent import *
 from Game.simulation_stats import *
 from Game.state import *
+from Game.gamemap import *
 import time
 
 class Engine:
-    def __init__(self, env, model, max_iters = 1000):
-        self.game_map = env.get_game_map()
+    def __init__(self, env, model, max_iters = 1000, gui = False):
+        self.game_map = GameMap(env, gui)
 
         initial_agent_vision = self.game_map.get_vision(env.agent_row, env.agent_col, env.agent_orientation)
         self.agent = Agent(env.agent_row, env.agent_col, env.agent_orientation, initial_agent_vision, model, env.rows, env.cols)
@@ -15,6 +16,8 @@ class Engine:
         self.iters = 0
         
         self.stats = SimulationStats()
+
+        self.gui = gui
 
     def simulate(self, train = True):
         self.update(train)
@@ -29,7 +32,8 @@ class Engine:
 
             self.iters += 1
 
-            time.sleep(1)
+            if self.gui:
+                time.sleep(0.5)
 
             self.update(train)
 
@@ -40,7 +44,9 @@ class Engine:
         self.stats.print_summary()
         
         # we return just the final score of the simulation
-        return self.stats.scores[-1]
+        final_score = sum(self.stats.rewards)
+
+        return final_score
             
     def apply_action(self, next_action):
         match self.is_valid(next_action):

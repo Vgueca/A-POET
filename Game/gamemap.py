@@ -3,20 +3,24 @@ from Game.gui import *
 import random
 
 class GameMap:
-    def __init__(self, rows, cols, initial_agent_position, initial_agent_orientation, map):
-        self.rows = rows
-        self.cols = cols
+    def __init__(self, env, gui):
+        self.rows = env.rows
+        self.cols = env.cols
         
-        self.map = map
-        
-        self.map_gui = GameGUI(self.map, initial_agent_position, initial_agent_orientation)
+        self.map = env.game_map
 
-        self.agent_map = [[CellType.NOT_VISITED for _ in range(cols)] for _ in range(rows)]
+        initial_agent_position = (env.agent_row, env.agent_col)
+        initial_agent_orientation = env.agent_orientation
 
-        self.agent_gui = GameGUI(self.agent_map, initial_agent_position, initial_agent_orientation)
+        self.gui = gui
 
-    def run(self):
-        self.agent_gui.mainloop()
+        if gui:
+            self.map_gui = GameGUI(self.map, initial_agent_position, initial_agent_orientation)
+
+        self.agent_map = [[CellType.NOT_VISITED for _ in range(self.cols)] for _ in range(self.rows)]
+
+        if gui:
+            self.agent_gui = GameGUI(self.agent_map, initial_agent_position, initial_agent_orientation)
     
     def get_cell_type(self, row, col):
         return self.map[row][col]
@@ -87,8 +91,9 @@ class GameMap:
                         if row-j >= 0 and col-i >= 0 and row-j < self.rows and col-i < self.cols:
                             self.agent_map[row-j][col-i] = self.map[row-j][col-i]
         
-        self.agent_gui.update_gui(self.agent_map, (row, col), orientation)
-        self.map_gui.update_gui(self.map, (row, col), orientation)
+        if self.gui:
+            self.agent_gui.update_gui(self.agent_map, (row, col), orientation)
+            self.map_gui.update_gui(self.map, (row, col), orientation)
 
     def create_map(self, rows, cols):
         self.initialize_random_map(rows, cols)

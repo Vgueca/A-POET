@@ -3,7 +3,6 @@ from argparse import ArgumentParser
 from copy import deepcopy
 from collections import namedtuple
 
-from Game.game_environment import GameEnv
 from Game.agent import Agent
 from Game.engine import Engine
 from Game.utils import *
@@ -25,7 +24,7 @@ def master(args):
     active_niches = []
     all_niches = []
 
-    initial_env = Environment(id = 0)
+    initial_env = Environment(id = 0, seed = args.seed)
     inital_model = Model(args)
 
     initial_niche = Niche(0, initial_env, inital_model)
@@ -79,7 +78,7 @@ def master(args):
 
             if child_env not in all_envs:
                 # child_model = deepcopy(models[parent_id])             # Not necessary because the model is not modified
-                score = Engine(child_env, child_model).simulate(train = False)
+                score = Engine(child_env, child_model, args.max_simulation_iters, args.gui).simulate(train = False)
                 if score > args.mc_lower and score < args.mc_upper:     # Passes the minimal criterion
                     novelty_score = compute_novelty(child_env, all_niches, args.mc_lower, args.mc_upper, args.k)
                     child_list.append((child_env, child_model, score, novelty_score))
@@ -91,7 +90,7 @@ def master(args):
             max_score = child_score
             model_max_score = child_model
             for model in all_models:
-                score = Engine(child_env, model).simulate(train = False)
+                score = Engine(child_env, model, args.max_simulation_iters, args.gui).simulate(train = False)
                 if score > max_score:
                     max_score = score
                     model_max_score = model
@@ -110,24 +109,22 @@ def master(args):
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument("--rows", type=int, default=10)
-    parser.add_argument("--cols", type=int, default=10)
-    '''parser.add_argument("--agent_row", type=int, default=5)
-    parser.add_argument("--agent_col", type=int, default=5)
-    parser.add_argument("--agent_orientation", type=int, default=0)'''
     parser.add_argument("--max_simulation_iters", type=int, default=1000)
     parser.add_argument("--gui", type=bool, default=False)
     parser.add_argument("--max_steps", type=int, default=1000)
     parser.add_argument("--steps_before_transfer", type=int, default=25)
     parser.add_argument("--steps_before_mutate", type=int, default=100)
     parser.add_argument("--seed", type=int, default=3)
-    parser.add_argument("--repro_threshold", type=int, default=200)     # The minimum score to reproduce (we must adjust this to our needs)
+    parser.add_argument("--repro_threshold", type=int, default=0.75)    # The minimum score to reproduce (we must adjust this to our needs)
     parser.add_argument("--max_children_trials", type=int, default=8)   # The maximum number of reproduction trials per mutation step
     parser.add_argument("--max_children", type=int, default=1)          # The maximum number of children admitted per mutation step
     parser.add_argument("--max_num_envs", type=int, default=100)        # The maximum number of active environments
-    parser.add_argument("--mc_lower", type=int, default=25)             # The minimum score to pass the minimal criterion (we must adjust this to our needs)
-    parser.add_argument("--mc_upper", type=int, default=340)            # The maximum score to pass the minimal criterion (we must adjust this to our needs)
+    parser.add_argument("--mc_lower", type=int, default=0.25)           # The minimum score to pass the minimal criterion (we must adjust this to our needs)
+    parser.add_argument("--mc_upper", type=int, default=0.9)             # The maximum score to pass the minimal criterion (we must adjust this to our needs)
     parser.add_argument("--k, type=int", default=5)                     # The number of neighbors to consider for the novelty score (in POET they use 5)
+    parser.add_argument("--learning_rate", type=float, default=0.1)
+    parser.add_argument("--discount_factor", type=float, default=0.99)
+    parser.add_argument("--epsilon_greedy", type=float, default=0.1)
     args = parser.parse_args()
     
     master(args)

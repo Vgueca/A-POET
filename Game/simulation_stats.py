@@ -3,15 +3,13 @@ class SimulationStats:
         self.actions = []
         self.map_percentage = []
         self.energy = []
-        self.scores = []
+        self.rewards = []
     
     def update(self, agent, state):
         self.actions.append(agent.brain.last_action)
         self.map_percentage.append(state.compute_percentage_map())
         self.energy.append(agent.get_energy())
-        
-        #TODO define state here
-        self.scores.append(agent.get_score(state))
+        self.rewards.append(agent.get_reward(state))
 
     def compute_average_energy_consumition(self):
         return sum([self.energy[i] - self.energy[i-1] for i in range(0, len(self.energy))]) / len(self.energy)
@@ -40,4 +38,4 @@ class SimulationStats:
         print("Percentage of map discovered: ", self.map_percentage[-1])
         print("Average energy consumed: ", self.compute_average_energy_consumition())
         print("Percentage of each action: ", self.compute_percentage_actions())
-        print("Score: ", self.scores[-1])
+        print("Final score: ", sum(self.rewards))

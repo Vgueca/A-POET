@@ -14,7 +14,7 @@ class Environment:
     # Inicializar un reproductor que mínimo tenga un tipo de casilla
     def __init__(self, id = None, rows = 10, cols = 10,
                  agent_row = 5, agent_col = 5, agent_orientation = 0,
-                 relative_freqs = [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],       # 0. Empty | 1. Wall | 2. Stone | 3. Sand | 4. Water | 5. Grass | 6. Mud | 7. Bikini | 8. Shoes | 9. Charge
+                 relative_freqs = [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],       # 0. Empty | 1. Wall | 2. Stone | 3. Sand | 4. Water | 5. Grass | 6. Mud | 7. Bikini | 8. Shoes | 9. Charge
                  seed = 3):
         if id is None:
             print("ERROR: Environment ID not provided") # RAISE ERROR
@@ -54,22 +54,24 @@ class Environment:
         seed = self.seed
 
         # MUTATE ROWS
-        rows = rows + random.randint(-10, 10)
+        rows = rows + random.randint(-10, 11)
         if rows > Environment.max_rows:
             rows = Environment.max_rows
         if rows < 1:
             rows = 1
 
         # MUTATE COLS
-        cols = cols + random.randint(-10, 10)
+        cols = cols + random.randint(-10, 11)
         if cols > Environment.max_cols:
             cols = Environment.max_cols
         if cols < 1:
             cols = 1
 
         # MUTATE AGENT
-        agent_row = random.randint(0, rows)
-        agent_col = random.randint(0, cols)
+        row_change = round(rows * 0.1)
+        col_change = round(cols * 0.1)
+        agent_row = agent_row + random.randint(-row_change, row_change + 1)
+        agent_col = agent_col + random.randint(-col_change, col_change + 1)
         agent_orientation = random.randint(0, 3)
 
         # MUTATE FREQS
@@ -96,9 +98,6 @@ class Environment:
 
         return child
     
-    def get_game_map(self):
-        return self.game_map
-    
     def generate_game_map(self):
         cell_types = self.get_cell_types_number()
         
@@ -106,8 +105,14 @@ class Environment:
 
         agent_index = self.agent_row * self.cols + self.agent_col
         random.shuffle(map)
-        while (map[agent_index] == CellType.EMPTY or map[agent_index] == CellType.WALL):
-            random.shuffle(map)
+
+        if map[agent_index] == CellType.EMPTY or map[agent_index] == CellType.WALL:     # If the agent is in an empty or wall cell, we swap it with a non-empty and non-wall cell
+            indexes_map_not_empty_not_wall = [i for i in range(len(map)) if map[i] != CellType.EMPTY and map[i] != CellType.WALL]
+            random_index = random.choice(indexes_map_not_empty_not_wall)
+
+            aux = map[agent_index]
+            map[agent_index] = map[random_index]
+            map[random_index] = aux
 
         # Vector into matrix
         return vector_into_matrix(map, self.rows, self.cols)
@@ -130,7 +135,7 @@ class Environment:
         freqs = normalize_vector(freqs)
 
         rest = n_cells - sum(cells)
-        for i in range (rest):
+        for _ in range(rest):
             addition = 0.0
             prob = random.random()
             for j in range(len(freqs)):
@@ -153,7 +158,7 @@ class Environment:
     def put_cell_types_into_vector(self, cell_types):
         map = []
         for i in range(len(cell_types)):
-            for j in range(cell_types[i]):
+            for _ in range(cell_types[i]):
                 map.append(Game.CellType(i))
 
         return map

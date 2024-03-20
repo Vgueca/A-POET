@@ -1,4 +1,4 @@
-from utils import CellType
+from Game.utils import CellType
 
 class State:
     def __init__(self, agent):
@@ -10,6 +10,7 @@ class State:
         self.agent_bikini = agent.get_bikini()
         self.agent_shoes = agent.get_shoes()
         self.agent_alive = agent.is_alive()
+        self.agent_max_energy = agent.max_energy
         
     def flatten_state(self): # we are not using it since we have not a neural network as model
         return [self.agent_position[0], self.agent_position[1], self.agent_orientation, self.agent_energy, self.agent_bikini, self.agent_shoes] + self.agent_vision + self.agent_memory #TODO concatenate dictionary with lists???

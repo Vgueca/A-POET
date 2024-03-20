@@ -10,6 +10,7 @@ class Agent:
         self.brain = Brain(model)
         
         self.energy = max_energy
+        self.max_energy = max_energy
         
         self.max_rows = max_rows
         self.max_cols = max_cols
@@ -33,7 +34,7 @@ class Agent:
     def train_brain(self, new_state):
         self.brain.train(new_state)
     
-    def get_score(self, state):
+    def get_reward(self, state):
         return self.brain.compute_reward(state)
 
     def get_position(self):
@@ -72,6 +73,8 @@ class Agent:
         
     def increase_energy(self, energy):
         self.energy += energy
+        if energy > self.max_energy:
+            self.energy = self.max_energy
         
     def decrease_energy(self, energy):
         self.energy -= energy

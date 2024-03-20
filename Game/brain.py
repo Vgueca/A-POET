@@ -18,6 +18,6 @@ class Brain:
 
     def compute_reward(self, new_state):
         if new_state.agent_alive:
-            return new_state.compute_percentage_map() - self.prev_state.compute_percentage_map()
+            return new_state.compute_percentage_map() - self.prev_state.compute_percentage_map() # + 0.1 * (new_state.agent_energy - self.prev_state.agent_energy) / new_state.agent_max_energy
     
         return -100 # if the agent is dead, we give a negative reward
