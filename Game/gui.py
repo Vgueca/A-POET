@@ -14,7 +14,7 @@ class GameGUI(tk.Tk):
         self.create_gui(initial_game_map, agent_position, agent_orientation)
         
     def create_gui(self, game_map, agent_position, agent_orientation):
-        self.canvas = tk.Canvas(self, width = self.cols * 50, height = self.rows * 50)
+        self.canvas = tk.Canvas(self, width = self.cols * 30, height = self.rows * 30)
         self.canvas.pack()
         
         self.update_gui(game_map, agent_position, agent_orientation)
@@ -27,8 +27,8 @@ class GameGUI(tk.Tk):
                 cell_type = game_map[i][j]
                 color = self.get_color(cell_type)
 
-                x1, y1 = j * 50, i * 50
-                x2, y2 = x1 + 50, y1 + 50
+                x1, y1 = j * 30, i * 30
+                x2, y2 = x1 + 30, y1 + 30
 
                 self.canvas.create_rectangle(x1, y1, x2, y2, fill=color)
 
@@ -39,8 +39,8 @@ class GameGUI(tk.Tk):
         self.update()
 
     def draw_triangle(self, x, y, orientation):
-        length = 30
-        width = 15
+        length = 20
+        width = 10
 
         direction = {
             Direction.DOWN: (0, 1),
@@ -50,12 +50,12 @@ class GameGUI(tk.Tk):
         }[orientation]
 
         # Compute the triangle vertices
-        x1 = x * 50 + 25 - width * direction[1]
-        y1 = y * 50 + 25 + width * direction[0]
-        x2 = x * 50 + 25 + length * direction[0]
-        y2 = y * 50 + 25 + length * direction[1]
-        x3 = x * 50 + 25 + width * direction[1]
-        y3 = y * 50 + 25 - width * direction[0]
+        x1 = x * 30 + 15 - width * direction[1]
+        y1 = y * 30 + 15 + width * direction[0]
+        x2 = x * 30 + 15 + length * direction[0]
+        y2 = y * 30 + 15 + length * direction[1]
+        x3 = x * 30 + 15 + width * direction[1]
+        y3 = y * 30 + 15 - width * direction[0]
 
         # Draw the triangle
         self.canvas.create_polygon(x1, y1, x2, y2, x3, y3, fill="white")

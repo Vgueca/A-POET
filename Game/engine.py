@@ -6,45 +6,54 @@ from Game.gamemap import *
 import time
 
 class Engine:
-    def __init__(self, env, model, max_iters = 1000, gui = False):
+    def __init__(self, env, model, max_iters, gui):
         self.game_map = GameMap(env, gui)
 
         initial_agent_vision = self.game_map.get_vision(env.agent_row, env.agent_col, env.agent_orientation)
         self.agent = Agent(env.agent_row, env.agent_col, env.agent_orientation, initial_agent_vision, model, env.rows, env.cols)
 
+        self.game_map.update_agent_map(env.agent_row, env.agent_col, env.agent_orientation)
+
         self.max_iters = max_iters
         self.iters = 0
         
-        self.stats = SimulationStats()
+        self.stats = SimulationStats(self.game_map.agent_map)
 
         self.gui = gui
 
-    def simulate(self, train = True):
-        self.update(train)
-        
-        while self.iters < self.max_iters:
-            state = State(self.agent, self.game_map)
-            next_action = self.agent.next_action(state)
+    def simulate(self, batch_size, train):
+        if batch_size < 1:
+            # RAISE ERROR
+            print("ERROR: Batches must be greater than 0!")
+
+        scores = []
+
+        for _ in range(batch_size):
+            self.reset()
             
-            print(next_action)
+            while self.iters < self.max_iters:
+                state = State(self.agent, self.game_map.agent_map)
+                next_action = self.agent.next_action(state)
 
-            valid = self.apply_action(next_action)
+                valid = self.apply_action(next_action)
 
-            self.iters += 1
+                self.iters += 1
 
-            if self.gui:
-                time.sleep(0.5)
+                if self.gui:
+                    time.sleep(0.001)
 
-            self.update(train)
+                self.update(train)
 
-            # if the agent fell into the void or ran out of energy, terminate the simulation
-            if valid == Validation.EMPTY_CELL or valid == Validation.NO_ENERGY:
-                break
+                # if the agent fell into the void or ran out of energy, terminate the simulation
+                if valid == Validation.EMPTY_CELL or valid == Validation.NO_ENERGY or self.stats.map_percentage[-1] == 1.0:
+                    break
+
+            # self.stats.print_summary()
+
+            scores.append(self.stats.compute_final_score())
         
-        self.stats.print_summary()
-        
-        # we return just the final score of the simulation
-        final_score = sum(self.stats.rewards)
+        # we return just the mean score of the simulation
+        final_score = sum(scores) / len(scores)
 
         return final_score
             
@@ -52,15 +61,15 @@ class Engine:
         match self.is_valid(next_action):
             case Validation.EMPTY_CELL:
                 # Terminate the simulation
-                print("The agent fell into the void!")
+                # print("The agent fell into the void!")
                 self.agent.alive = False
                 return Validation.EMPTY_CELL
             case Validation.WALL_CELL:
-                print("The agent crashed into a wall!")
+                # print("The agent crashed into a wall!")
                 return Validation.WALL_CELL
             case Validation.NO_ENERGY:
                 # Terminate the simulation
-                print("The agent ran out of energy!")
+                # print("The agent ran out of energy!")
                 return Validation.NO_ENERGY 
             case Validation.VALID:
                 # Update the agent's energy
@@ -91,14 +100,14 @@ class Engine:
             self.game_map.update_agent_map(self.agent.row, self.agent.column, self.agent.orientation)
         
         # Create a new state
-        new_state = State(self.agent, self.game_map)
-        
-        # Update the stats
-        self.stats.update(self.agent, new_state)
+        new_state = State(self.agent, self.game_map.agent_map)
         
         # Train the agent's brain model
         if train:
             self.agent.train_brain(new_state)
+
+        # Update the stats
+        self.stats.update(self.agent, new_state)
 
     def is_valid(self, action):
         # Check if the agent has enough energy to move
@@ -120,3 +129,10 @@ class Engine:
                 return Validation.VALID
 
         return Validation.VALID
+
+    def reset(self):
+        self.game_map.reset()
+        self.agent.restart()
+        self.game_map.update_agent_map(self.agent.row, self.agent.column, self.agent.orientation)
+        self.stats.reset(self.game_map.agent_map)
+        self.iters = 0

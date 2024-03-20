@@ -3,6 +3,10 @@ from Game.brain import *
 
 class Agent:
     def __init__(self, row, column, orientation, initial_vision, model, max_rows = 50, max_cols = 50, max_energy = 5000):
+        self.initial_row = row
+        self.initial_column = column
+        self.initial_orientation = orientation
+
         self.row = row
         self.column = column
         self.orientation = orientation
@@ -22,6 +26,7 @@ class Agent:
         self.relative_column = 0
         self.discovered_map = {}
 
+        self.initial_vision = initial_vision
         self.vision = initial_vision
         self.register_vision()
         
@@ -57,6 +62,9 @@ class Agent:
     
     def get_memory(self):
         return self.discovered_map
+    
+    def get_vision(self):
+        return self.vision
 
     def is_alive(self):
         return self.alive
@@ -140,5 +148,17 @@ class Agent:
                     for j in range(-i,i+1):
                         self.discovered_map[(row-j, col-i)] = self.vision[count]
                         count += 1
-                        
-            
+
+    def restart(self):
+        self.row = self.initial_row
+        self.column = self.initial_column
+        self.orientation = self.initial_orientation
+        self.energy = self.max_energy
+        self.has_bikini = False
+        self.has_shoes = False
+        self.relative_row = 0
+        self.relative_column = 0
+        self.discovered_map = {}
+        self.vision = self.initial_vision
+        self.register_vision()
+        self.alive = True

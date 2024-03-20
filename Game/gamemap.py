@@ -9,18 +9,18 @@ class GameMap:
         
         self.map = env.game_map
 
-        initial_agent_position = (env.agent_row, env.agent_col)
-        initial_agent_orientation = env.agent_orientation
+        self.initial_agent_position = (env.agent_row, env.agent_col)
+        self.initial_agent_orientation = env.agent_orientation
 
         self.gui = gui
 
         if gui:
-            self.map_gui = GameGUI(self.map, initial_agent_position, initial_agent_orientation)
+            self.map_gui = GameGUI(self.map, self.initial_agent_position, self.initial_agent_orientation)
 
         self.agent_map = [[CellType.NOT_VISITED for _ in range(self.cols)] for _ in range(self.rows)]
 
         if gui:
-            self.agent_gui = GameGUI(self.agent_map, initial_agent_position, initial_agent_orientation)
+            self.agent_gui = GameGUI(self.agent_map, self.initial_agent_position, self.initial_agent_orientation)
     
     def get_cell_type(self, row, col):
         return self.map[row][col]
@@ -127,3 +127,12 @@ class GameMap:
         
     def flatten_map(self):
         return [cell for row in self.agent_map for cell in row]
+    
+    def reset(self):
+        if self.gui:
+            self.map_gui = GameGUI(self.map, self.initial_agent_position, self.initial_agent_orientation)
+
+        self.agent_map = [[CellType.NOT_VISITED for _ in range(self.cols)] for _ in range(self.rows)]
+
+        if self.gui:
+            self.agent_gui = GameGUI(self.agent_map, self.initial_agent_position, self.initial_agent_orientation)

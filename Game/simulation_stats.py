@@ -1,13 +1,12 @@
+from Game.state import *
+
 class SimulationStats:
-    def __init__(self):
-        self.actions = []
-        self.map_percentage = []
-        self.energy = []
-        self.rewards = []
+    def __init__(self, agent_map):
+        self.reset(agent_map)
     
     def update(self, agent, state):
         self.actions.append(agent.brain.last_action)
-        self.map_percentage.append(state.compute_percentage_map())
+        self.map_percentage.append(compute_percentage_map(state.agent_map))
         self.energy.append(agent.get_energy())
         self.rewards.append(agent.get_reward(state))
 
@@ -32,10 +31,19 @@ class SimulationStats:
         print("Percentage of IDLE action: ", idle/total)
         print("Percentage of FORWARD action: ", forward/total)
         print("Percentage of TURN_LEFT action: ", turn_left/total)
-        print("Percentage of TURN_RIGHT action: ", turn_right/total)   
+        print("Percentage of TURN_RIGHT action: ", turn_right/total)
+    
+    def compute_final_score(self):
+        return sum(self.rewards)
     
     def print_summary(self):
         print("Percentage of map discovered: ", self.map_percentage[-1])
         print("Average energy consumed: ", self.compute_average_energy_consumition())
-        print("Percentage of each action: ", self.compute_percentage_actions())
-        print("Final score: ", sum(self.rewards))
+        self.compute_percentage_actions()
+        print("Final score: ", self.compute_final_score())
+
+    def reset(self, agent_map):
+        self.actions = []
+        self.map_percentage = [compute_percentage_map(agent_map)]
+        self.energy = []
+        self.rewards = [self.map_percentage[0]]
