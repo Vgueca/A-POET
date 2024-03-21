@@ -23,7 +23,7 @@ class Niche:
         self.stats = NicheStats(ID = id, Environment = env, Agent = model, N_iters = 0, Percentage = 0, Score=self.score, Max_Last_5_Scores=self.max_score_last_5)
 
     def simulate(self, batch_size, train = True):
-        self.score = Engine(self.env, self.model, self.args.max_simulation_iters, self.args.gui).simulate(batch_size, train)
+        self.score, best_stats = Engine(self.env, self.model, self.args.max_simulation_iters, self.args.gui).simulate(batch_size, train)
 
         if len(self.last_scores) == 5:
             if self.max_score_last_5 == self.last_scores[0]:         # If the best score is going to be removed:
@@ -36,6 +36,8 @@ class Niche:
 
         if self.score > self.max_score_last_5:     # Update the max score
             self.max_score_last_5 = self.score
+        
+        return best_stats
 
     def attempt_transfer(self, all_niches, pata_ec_batch_size):
         transfer_was_made = False
@@ -45,13 +47,13 @@ class Niche:
                 self.pata_ec_dict[index] = self.score
                 continue
 
-            d_score = Engine(self.env, niche.model, self.args.max_simulation_iters, self.args.gui).simulate(pata_ec_batch_size, train = False)
+            d_score = Engine(self.env, niche.model, self.args.max_simulation_iters, self.args.gui).simulate(pata_ec_batch_size, train = False)[0]
 
             self.pata_ec_dict[index] = d_score                   # Update the pata_ec scores
 
             if d_score > self.max_score_last_5:             # Passes the direct transfer test
                 new_model = deepcopy(niche.model)
-                ft_score = Engine(self.env, new_model, self.args.max_simulation_iters, self.args.gui).simulate(pata_ec_batch_size, train = True)
+                ft_score = Engine(self.env, new_model, self.args.max_simulation_iters, self.args.gui).simulate(pata_ec_batch_size, train = True)[0]
                 if ft_score > self.max_score_last_5:        # Passes the fine-tuning transfer test
                     self.model = new_model
                     self.last_scores = [ft_score]
@@ -62,7 +64,7 @@ class Niche:
 
         if transfer_was_made:
             for niche in all_niches:
-                score = Engine(niche.env, self.model, self.args.max_simulation_iters, self.args.gui).simulate(pata_ec_batch_size, train = False)
+                score = Engine(niche.env, self.model, self.args.max_simulation_iters, self.args.gui).simulate(pata_ec_batch_size, train = False)[0]
                 niche.pata_ec_dict[self.id] = score
     
     def update_pata_ec_ranks(self):

@@ -30,7 +30,7 @@ def compute_pata_ec(env, all_niches, lower, upper, pata_ec_batch_size):
     raw_scores = []
 
     for niche in all_niches:
-        score = cap_score(Engine(env, niche.model, niche.args.max_simulation_iters, niche.args.gui).simulate(pata_ec_batch_size, train = False), lower, upper)
+        score = cap_score(Engine(env, niche.model, niche.args.max_simulation_iters, niche.args.gui).simulate(pata_ec_batch_size, train = False)[0], lower, upper)
         raw_scores.append(score)
     
     env_pata_ec = np.array(np.argsort(-np.array(raw_scores)), dtype=float)      # Sort the clipped pataec scores in descending order and store the indices

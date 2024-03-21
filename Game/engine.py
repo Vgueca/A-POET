@@ -4,6 +4,7 @@ from Game.simulation_stats import *
 from Game.state import *
 from Game.gamemap import *
 import time
+import numpy as np
 
 class Engine:
     def __init__(self, env, model, max_iters, gui):
@@ -26,11 +27,10 @@ class Engine:
             # RAISE ERROR
             print("ERROR: Batches must be greater than 0!")
 
+        best_stats = [None, None, -np.Infinity, None]
         scores = []
 
-        for _ in range(batch_size):
-            self.reset()
-            
+        for i in range(batch_size):            
             while self.iters < self.max_iters:
                 state = State(self.agent, self.game_map.agent_map)
                 next_action = self.agent.next_action(state)
@@ -49,13 +49,18 @@ class Engine:
                     break
 
             # self.stats.print_summary()
+            
+            if self.stats.compute_final_score() > best_stats[2]:
+                best_stats = [i, self.stats.map_percentage[-1], self.stats.compute_final_score()] + self.stats.actions
 
             scores.append(self.stats.compute_final_score())
-        
+
+            self.reset(end = (i == batch_size - 1))
+            
         # we return just the mean score of the simulation
         final_score = sum(scores) / len(scores)
 
-        return final_score
+        return final_score, best_stats
             
     def apply_action(self, next_action):
         match self.is_valid(next_action):
@@ -130,9 +135,10 @@ class Engine:
 
         return Validation.VALID
 
-    def reset(self):
-        self.game_map.reset()
+    def reset(self, end):
+        self.game_map.reset(end)
         self.agent.restart()
-        self.game_map.update_agent_map(self.agent.row, self.agent.column, self.agent.orientation)
+        if not end:
+            self.game_map.update_agent_map(self.agent.row, self.agent.column, self.agent.orientation)
         self.stats.reset(self.game_map.agent_map)
         self.iters = 0

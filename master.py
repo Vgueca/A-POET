@@ -13,6 +13,7 @@ from Models.RL_model import *
 from niche import Niche
 
 from pata_ec import *
+import csv
 
 # GlobalStats = namedtuple("GlobalStats", ["Enviroment_Size", "Agent_Size", "Number_Transfers", "Number_mutations"])
 
@@ -20,11 +21,15 @@ def master(args):
     active_niches = []
     all_niches = []
 
+    best_stats_dict = {}
+
     initial_env = Environment(name = "e_0", id = 0, seed = args.seed)
-    inital_model = Model(args)
+    inital_model = Model(0,args)
 
     initial_niche = Niche(0, initial_env, inital_model, args)
     active_niches.append(initial_niche)
+            
+
     all_niches.append(initial_niche)
     
     #TODO print adequately the global stats for each iteration (via GUI in the future)
@@ -32,11 +37,21 @@ def master(args):
     n_transfers = 0
 
     step = 0
+    output = False
+
     while step < args.max_steps:
         # Simulate every niche. Here the agents must train
         for niche in active_niches:
-            niche.simulate(args.simulation_batch_size)
+            if not output:
+                niche.simulate(args.simulation_batch_size)
+            else:
+                best_stats_dict[niche.id] = niche.simulate(args.simulation_batch_size)
+            
             print("Step:", step, "Env:", niche.env.name, "Simulation finished with score:", niche.score)
+        
+        if output:
+            generate_output(all_niches, best_stats_dict, step)
+            output = False
 
         step += 1
 
@@ -50,6 +65,8 @@ def master(args):
             n_mutations += mutate_envs(active_niches, all_niches, args)
             print("NUM EVS:", len(all_niches))
 
+        if step % args.steps_before_output == args.steps_before_output - 1:
+            output = True
     
 def attempt_transfer(all_niches, pata_ec_batch_size):         # In POET the only attempt the tranfers between the active niches
     n_transfer = 0
@@ -86,7 +103,7 @@ def mutate_envs(active_niches, all_niches, args):
         if child_env not in all_envs:
             child_model = deepcopy(parent_niche.model)              # Not necessary because the model is not modified
             # score = Engine(child_env, child_model, args.max_simulation_iters, args.gui).simulate(train = False)
-            score = Engine(child_env, child_model, args.max_simulation_iters, True).simulate(args.mc_batch_size, train = False)
+            score = Engine(child_env, child_model, args.max_simulation_iters, True).simulate(args.mc_batch_size, train = False)[0]
             print(f"CHILD SCORE (mean over {args.mc_batch_size}):", score)
             if score > args.mc_lower and score < args.mc_upper:     # Passes the minimal criterion
                 novelty_score = compute_novelty(child_env, all_niches, args.mc_lower, args.mc_upper, args.k, args.pata_ec_batch_size)
@@ -101,7 +118,7 @@ def mutate_envs(active_niches, all_niches, args):
         max_score = child_score
         model_max_score = child_model
         for model in all_models:
-            score = Engine(child_env, model, args.max_simulation_iters, args.gui).simulate(args.pata_ec_batch_size, train = False)
+            score = Engine(child_env, model, args.max_simulation_iters, args.gui).simulate(args.pata_ec_batch_size, train = False)[0]
             if score > max_score:
                 max_score = score
                 model_max_score = model
@@ -109,6 +126,7 @@ def mutate_envs(active_niches, all_niches, args):
         print("MAX SCORE FOR CHILD:", max_score)
         
         if max_score > args.mc_lower and max_score < args.mc_upper:     # Passes the minimal criterion
+            model_max_score.id = len(all_niches)
             new_niche = Niche(len(all_niches), child_env, model_max_score, args)
             all_niches.append(new_niche)
             active_niches.append(new_niche)
@@ -122,6 +140,14 @@ def mutate_envs(active_niches, all_niches, args):
         active_niches = active_niches[:args.max_num_envs]
 
     return n_mutations
+
+def generate_output(all_niches, best_stats_dict, step):
+    # Generate a CSV file with the main stats for each niche
+    with open(f'global_stats_{step}.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['Niche ID', 'Environment Name', 'Model ID', 'Score', 'Max_Score_last_5'] + [f'Pata_EC_{i}' for i in range(len(all_niches))] + ['Iteration_best_score', 'Percentage_best_score', 'Best_score', 'Actions_best_score'])
+        for niche in all_niches:
+            writer.writerow([niche.id, niche.env.name, niche.model.id, niche.score, niche.max_score_last_5] + list(niche.pata_ec_dict.values()) + best_stats_dict[niche.id])
 
 def main():
     parser = ArgumentParser()
@@ -149,6 +175,7 @@ def main():
     parser.add_argument("--max_agent_row_change", type=int, default=5)
     parser.add_argument("--max_agent_col_change", type=int, default=5)
     parser.add_argument("--max_percentage_freq_change", type=float, default=0.05)
+    parser.add_argument("--steps_before_output", type=int, default=250)
     args = parser.parse_args()
     
     master(args)

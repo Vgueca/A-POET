@@ -1,7 +1,8 @@
 import numpy as np
 
 class Model:
-    def __init__(self, args):
+    def __init__(self, niche_id, args):
+        self.id = niche_id
         self.q_values = {}
         self.learning_rate = args.learning_rate
         self.discount_factor = args.discount_factor
@@ -15,7 +16,12 @@ class Model:
             return np.random.choice(4)
         else:
             candidates_q_values = [self.q_values[(state, a)] for a in range(4)]
-            return np.argmax(candidates_q_values)
+            indices = np.argmax(candidates_q_values)
+            if type(indices) is np.int64:
+                return indices
+            print("holaaa")
+            return np.random.choice(indices)
+            
 
     def train(self, prev_state, action, reward, next_state):
         self.initialize_q_values(prev_state)
