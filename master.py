@@ -118,7 +118,7 @@ def mutate_envs(active_niches, all_niches, args):
         max_score = child_score
         model_max_score = child_model
         for model in all_models:
-            score = Engine(child_env, model, args.max_simulation_iters, args.gui).simulate(args.pata_ec_batch_size, train = False)[0]
+            score = Engine(child_env, model, args.max_simulation_iters, True).simulate(args.pata_ec_batch_size, train = False)[0]
             if score > max_score:
                 max_score = score
                 model_max_score = model
@@ -147,7 +147,7 @@ def generate_output(all_niches, best_stats_dict, step):
         writer = csv.writer(csvfile)
         writer.writerow(['Niche ID', 'Environment Name', 'Model ID', 'Score', 'Max_Score_last_5'] + [f'Pata_EC_{i}' for i in range(len(all_niches))] + ['Iteration_best_score', 'Percentage_best_score', 'Best_score', 'Actions_best_score'])
         for niche in all_niches:
-            writer.writerow([niche.id, niche.env.name, niche.model.id, niche.score, niche.max_score_last_5] + list(niche.pata_ec_dict.values()) + best_stats_dict[niche.id])
+            writer.writerow([niche.id, niche.env.name, niche.model.id, niche.score, niche.max_score_last_5] + [niche.pata_ec_dict[niche2.id] for niche2 in all_niches] + best_stats_dict[niche.id])
 
 def main():
     parser = ArgumentParser()
@@ -162,7 +162,7 @@ def main():
     parser.add_argument("--max_children", type=int, default=1)          # The maximum number of children admitted per mutation step
     parser.add_argument("--max_num_envs", type=int, default=100)        # The maximum number of active environments
     parser.add_argument("--mc_lower", type=int, default=0.25)           # The minimum score to pass the minimal criterion (we must adjust this to our needs)
-    parser.add_argument("--mc_upper", type=int, default=0.9)             # The maximum score to pass the minimal criterion (we must adjust this to our needs)
+    parser.add_argument("--mc_upper", type=int, default=0.9)            # The maximum score to pass the minimal criterion (we must adjust this to our needs)
     parser.add_argument("--k", type=int, default=5)                     # The number of neighbors to consider for the novelty score (in POET they use 5)
     parser.add_argument("--learning_rate", type=float, default=0.1)
     parser.add_argument("--discount_factor", type=float, default=0.99)

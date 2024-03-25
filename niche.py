@@ -3,6 +3,7 @@ from Models.RL_model import *
 from Game.engine import Engine
 from copy import deepcopy
 from collections import namedtuple
+from pata_ec import compute_ranks
 NicheStats = namedtuple("NicheStats", ["ID", "Environment", "Agent", "N_iters", "Percentage", "Score", "Max_Last_5_Scores"])
 
 class Niche:
@@ -42,14 +43,14 @@ class Niche:
     def attempt_transfer(self, all_niches, pata_ec_batch_size):
         transfer_was_made = False
 
-        for index, niche in enumerate(all_niches):
-            if index == self.id:
-                self.pata_ec_dict[index] = self.score
+        for niche in all_niches:
+            if niche.id == self.id:
+                # self.pata_ec_dict[index] = self.score
                 continue
 
             d_score = Engine(self.env, niche.model, self.args.max_simulation_iters, self.args.gui).simulate(pata_ec_batch_size, train = False)[0]
 
-            self.pata_ec_dict[index] = d_score                   # Update the pata_ec scores
+            self.pata_ec_dict[niche.id] = d_score                   # Update the pata_ec scores
 
             if d_score > self.max_score_last_5:             # Passes the direct transfer test
                 new_model = deepcopy(niche.model)
@@ -67,7 +68,7 @@ class Niche:
                 score = Engine(niche.env, self.model, self.args.max_simulation_iters, self.args.gui).simulate(pata_ec_batch_size, train = False)[0]
                 niche.pata_ec_dict[self.id] = score
     
-    def update_pata_ec_ranks(self):
+    def update_pata_ec_ranks(self, all_niches):
         def cap_score(score):
             if score < self.args.mc_lower:
                 return self.args.mc_lower
@@ -78,10 +79,11 @@ class Niche:
             return score
         
         raw_scores = []
-        for value in self.pata_ec_dict.values():
+        for niche in all_niches:
+            value = self.pata_ec_dict[niche.id]
             raw_scores.append(cap_score(value))
         
-        self.pata_ec_ranks = np.array(np.argsort(-np.array(raw_scores)), dtype=float)       # Sort the clipped pataec scores in descending order and store the indices
+        self.pata_ec_ranks = compute_ranks(raw_scores)                          # Sort the clipped pataec scores in descending order and store the indices
         if len(self.pata_ec_ranks) > 1:
-            self.pata_ec_ranks /= float(len(self.pata_ec_ranks) - 1)                        # Normalize the indices
-            self.pata_ec_ranks -= 0.5                                                       # Center the indices
+            self.pata_ec_ranks /= float(len(self.pata_ec_ranks) - 1)            # Normalize the indices
+            self.pata_ec_ranks -= 0.5                                           # Center the indices

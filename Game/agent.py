@@ -24,6 +24,8 @@ class Agent:
         
         self.relative_row = 0
         self.relative_column = 0
+        self.relative_orientation = 0
+        
         self.discovered_map = {}
 
         self.initial_vision = initial_vision
@@ -111,19 +113,30 @@ class Agent:
             self.column += 1
         elif self.orientation == Direction.LEFT:
             self.column -= 1
+
+        if self.relative_orientation == Direction.UP:
+            self.relative_row -= 1
+        elif self.relative_orientation == Direction.DOWN:
+            self.relative_row += 1
+        elif self.relative_orientation == Direction.RIGHT:
+            self.relative_column += 1
+        elif self.relative_orientation == Direction.LEFT:
+            self.relative_column -= 1
         
     def turn_left(self):
         self.orientation = (self.orientation + 3) % 4
+        self.relative_orientation = (self.relative_orientation + 3) % 4
     
     def turn_right(self):
         self.orientation = (self.orientation + 1) % 4
+        self.relative_orientation = (self.relative_orientation + 1) % 4
             
     def register_vision(self):
         count = 0
         row = self.relative_row
         col = self.relative_column
         
-        match self.orientation:
+        match self.relative_orientation:
             # 0
             case Direction.UP:  
                 for i in range(0,4):
@@ -158,6 +171,7 @@ class Agent:
         self.has_shoes = False
         self.relative_row = 0
         self.relative_column = 0
+        self.relative_orientation = 0
         self.discovered_map = {}
         self.vision = self.initial_vision
         self.register_vision()

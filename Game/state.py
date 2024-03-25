@@ -4,8 +4,8 @@ class State:
     def __init__(self, agent, agent_map):
         self.agent_memory = agent.get_memory()
         self.agent_map = agent_map
-        self.agent_position = agent.get_position()
-        self.agent_orientation = agent.get_orientation()
+        self.agent_relative_position = (agent.relative_row, agent.relative_column)
+        self.agent_relative_orientation = agent.relative_orientation
         self.agent_energy = agent.get_energy()
         self.agent_vision = agent.get_vision()
         self.agent_bikini = agent.get_bikini()
@@ -14,10 +14,10 @@ class State:
         self.agent_max_energy = agent.max_energy
         
     def flatten_state(self): # we are not using it since we have not a neural network as model
-        return [self.agent_position[0], self.agent_position[1], self.agent_orientation, self.agent_energy, self.agent_bikini, self.agent_shoes] + self.agent_vision + self.agent_memory #TODO concatenate dictionary with lists???
+        return [self.agent_relative_position[0], self.agent_relative_position[1], self.agent_relative_orientation, self.agent_energy, self.agent_bikini, self.agent_shoes] + self.agent_vision + self.agent_memory #TODO concatenate dictionary with lists???
     
     def __key(self):
-        return (self.agent_position, self.agent_orientation, self.agent_energy, tuple(self.agent_vision), self.agent_bikini, self.agent_shoes, tuple(self.agent_memory))
+        return (self.agent_relative_position, self.agent_relative_orientation, self.agent_energy, tuple(self.agent_vision), self.agent_bikini, self.agent_shoes, tuple(self.agent_memory))
 
     def __hash__(self):
         return hash(self.__key())
