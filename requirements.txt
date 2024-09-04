@@ -112,7 +112,7 @@ openjpeg==2.5.2
 openssl==3.2.1
 packaging==24.0
 pcre2==10.43
-pillow==10.2.0
+pillow==10.3.0
 pip==24.0
 pixman==0.43.2
 ply==3.11
