@@ -9,7 +9,7 @@ ca-certificates==2024.2.2
 cached-property==1.5.2
 cached_property==1.5.2
 cairo==1.18.0
-certifi==2024.2.2
+certifi==2024.7.4
 contourpy==1.2.0
 cycler==0.12.1
 dbus==1.13.6
