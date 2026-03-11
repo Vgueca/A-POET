@@ -1,5 +1,4 @@
 from Game.utils import CellType, Direction
-from Game.gui import *
 import random
 
 class GameMap:
@@ -15,11 +14,13 @@ class GameMap:
         self.gui = gui
 
         if gui:
+            from Game.gui import GameGUI
             self.map_gui = GameGUI(self.map, self.initial_agent_position, self.initial_agent_orientation)
 
         self.agent_map = [[CellType.NOT_VISITED for _ in range(self.cols)] for _ in range(self.rows)]
 
         if gui:
+            from Game.gui import GameGUI
             self.agent_gui = GameGUI(self.agent_map, self.initial_agent_position, self.initial_agent_orientation)
     
     def get_cell_type(self, row, col):

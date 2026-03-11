@@ -14,7 +14,7 @@ class Niche:
 
         self.score = 0
         self.last_scores = []
-        self.max_score_last_5 = -np.Infinity
+        self.max_score_last_5 = -np.inf
 
         self.pata_ec_dict = {}       # Dictionary to store the pata_ec scores
         self.pata_ec_ranks = []      # List to store the pata_ec ranks

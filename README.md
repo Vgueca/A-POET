@@ -1,12 +1,20 @@
 # A-POET
-A-POET is an implementation of an adaptation of Paired Open-Ended Trailblazer (POET) to our own environments and agents. As it is a base for our thesis, we have changed some algorithms and methods that the original and enhanced POET used, in order to build a simpler but useful project from which to develop our thesis.
 
-## Installation
+<table>
+  <tr>
+    <td valign="top" width="50%">
+      <p>A-POET is an implementation of an adaptation of Paired Open-Ended Trailblazer (POET) to our own environments and agents. As it is a base for our thesis, we have changed some algorithms and methods that the original and enhanced POET used, in order to build a simpler but useful project from which to develop our thesis.</p>
+      <p>The simulations below show agents taking random actions in two different environments: the original rollout and a more complex map.</p>
+    </td>
+    <td valign="top" width="50%">
+      <img src="docs/media/cell-legend.png" alt="Cell legend" />
+    </td>
+  </tr>
+</table>
 
-To run the project, you can install the necessary dependencies listed in `requirements.txt`. This file contains the required versions of libraries to execute the project successfully.
+## Random-Action Simulations
 
-You can also set up and run the project in a conda environment by utilizing `environment.yml`.
-
-## Development Status
-
-Please note that this project is still under development and is in its early stages. Further updates and improvements are expected as development progresses.
+<p align="center">
+  <img src="docs/media/random-agent-rollout.gif" alt="Random agent rollout on the base map" width="%" /><br>
+  <img src="docs/media/complex-agent-rollout-4.gif" alt="Random agent rollout on the complex map" width="%" />
+</p>

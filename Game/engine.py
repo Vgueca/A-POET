@@ -27,7 +27,7 @@ class Engine:
             # RAISE ERROR
             print("ERROR: Batches must be greater than 0!")
 
-        best_stats = [None, None, -np.Infinity, None]
+        best_stats = [None, None, -np.inf, None]
         scores = []
 
         for i in range(batch_size):            
